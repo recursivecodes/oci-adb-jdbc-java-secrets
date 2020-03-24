@@ -1,4 +1,4 @@
-# oci-adb-jdbc-java
+# oci-adb-jdbc-java-secrets
 
 * Create Table
 
