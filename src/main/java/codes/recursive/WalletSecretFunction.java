@@ -41,7 +41,6 @@ public class WalletSecretFunction {
     );
 
     public WalletSecretFunction() {
-        System.out.println("Setting up secrets client");
         String version = System.getenv("OCI_RESOURCE_PRINCIPAL_VERSION");
         if( version != null ) {
             provider = ResourcePrincipalAuthenticationDetailsProvider.builder().build();
@@ -56,24 +55,19 @@ public class WalletSecretFunction {
         }
         secretsClient = new SecretsClient(provider);
         dbPassword = new String(getSecret(dbPasswordOcid));
-        System.out.println("Secrets client set up");
     }
 
     public List handleRequest() throws SQLException, JsonProcessingException {
         System.setProperty("oracle.jdbc.fanEnabled", "false");
         if( !walletDir.exists() ) {
-            System.out.println("Creating wallet...");
             createWallet(walletDir);
-            System.out.println("Wallet created!");
         }
 
         DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
         Connection conn = DriverManager.getConnection(dbUrl,dbUser,dbPassword);
         Statement statement = conn.createStatement();
-
         ResultSet resultSet = statement.executeQuery("select * from employees");
         List<HashMap<String, Object>> recordList = convertResultSetToList(resultSet);
-        System.out.println( new ObjectMapper().writeValueAsString(recordList) );
         conn.close();
         return recordList;
     }
