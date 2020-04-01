@@ -1,7 +1,7 @@
 package codes.recursive;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.oracle.bmc.Region;
 import com.oracle.bmc.auth.BasicAuthenticationDetailsProvider;
 import com.oracle.bmc.auth.ConfigFileAuthenticationDetailsProvider;
 import com.oracle.bmc.auth.ResourcePrincipalAuthenticationDetailsProvider;
@@ -25,10 +25,8 @@ public class WalletSecretFunction {
     private final File walletDir = new File("/tmp", "wallet");
     private final String dbUser = System.getenv().get("DB_USER");
     private final String dbUrl = System.getenv().get("DB_URL");
-    private final String dbPasswordOcid = System.getenv().get("PASSWORD_ID");
     private String dbPassword;
-    private BasicAuthenticationDetailsProvider provider = null;
-    private SecretsClient secretsClient = null;
+    private SecretsClient secretsClient;
 
     private final Map<String, String> walletFiles = Map.of(
             "cwallet.sso",  System.getenv().get("CWALLET_ID"),
@@ -42,6 +40,7 @@ public class WalletSecretFunction {
 
     public WalletSecretFunction() {
         String version = System.getenv("OCI_RESOURCE_PRINCIPAL_VERSION");
+        BasicAuthenticationDetailsProvider provider = null;
         if( version != null ) {
             provider = ResourcePrincipalAuthenticationDetailsProvider.builder().build();
         }
@@ -54,6 +53,9 @@ public class WalletSecretFunction {
             }
         }
         secretsClient = new SecretsClient(provider);
+        secretsClient.setRegion(Region.US_PHOENIX_1);
+
+        String dbPasswordOcid = System.getenv().get("PASSWORD_ID");
         dbPassword = new String(getSecret(dbPasswordOcid));
     }
 
@@ -93,6 +95,7 @@ public class WalletSecretFunction {
                 writeWalletFile(key);
             }
             catch (IOException e) {
+                walletDir.delete();
                 e.printStackTrace();
             }
         }
