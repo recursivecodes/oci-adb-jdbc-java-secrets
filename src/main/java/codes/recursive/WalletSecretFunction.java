@@ -65,7 +65,6 @@ public class WalletSecretFunction {
             createWallet(walletDir);
         }
 
-        DriverManager.registerDriver(new oracle.jdbc.OracleDriver());
         Connection conn = DriverManager.getConnection(dbUrl,dbUser,dbPassword);
         Statement statement = conn.createStatement();
         ResultSet resultSet = statement.executeQuery("select * from employees");
